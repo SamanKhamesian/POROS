@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIR Trajectory — Case Study</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 40px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .subtitle {
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 28px;
+    max-width: 720px;
+    line-height: 1.6;
+  }
+
+  /* ── Path row ── */
+  .path-row {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 28px;
+  }
+
+  .node {
+    flex: 1;
+    min-width: 0;
+    border-radius: 10px;
+    padding: 14px 10px 10px;
+    text-align: center;
+    border: 1px solid #ddd;
+  }
+
+  .node-source  { background: #FEE2E2; border-color: #FECACA; }
+  .node-inter   { background: #FEF3C7; border-color: #FDE68A; }
+  .node-target  { background: #D1FAE5; border-color: #A7F3D0; }
+
+  .node-label {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .node-source .node-label { color: #B91C1C; }
+  .node-inter  .node-label { color: #92400E; }
+  .node-target .node-label { color: #065F46; }
+
+  .node-id {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 10px;
+  }
+
+  .node-tir {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    line-height: 1;
+  }
+
+  .node-source .node-tir { color: #DC2626; }
+  .node-inter  .node-tir { color: #D97706; }
+  .node-target .node-tir { color: #059669; }
+
+  .tir-track {
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+
+  .tir-fill { height: 100%; border-radius: 99px; }
+  .node-source .tir-fill { background: #DC2626; }
+  .node-inter  .tir-fill { background: #D97706; }
+  .node-target .tir-fill { background: #059669; }
+
+  /* ── Connectors ── */
+  .connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    flex-shrink: 0;
+    gap: 2px;
+    padding: 0 4px;
+  }
+
+  .arr-tir  { font-size: 14px; font-weight: 600; color: #059669; white-space: nowrap; }
+  .arr-icon { font-size: 20px; color: #aaa; }
+  .arr-d    { font-size: 13px; color: #aaa; white-space: nowrap; }
+
+  /* ── Feature table ── */
+  .legend-row {
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 8px;
+    justify-content: flex-end;
+  }
+
+  .legend-row .dec { color: #DC2626; font-weight: 600; }
+  .legend-row .inc { color: #2563EB; font-weight: 600; }
+
+  .table-wrap {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .feat-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+
+  .feat-table thead tr {
+    background: #f5f5f5;
+  }
+
+  .feat-table th {
+    padding: 11px 14px;
+    border-bottom: 1px solid #e0e0e0;
+    font-weight: 600;
+    color: #555;
+    text-align: left;
+  }
+
+  .feat-table th.step-head {
+    text-align: center;
+    font-size: 14px;
+    color: #444;
+  }
+
+  .feat-table th.step-head span {
+    display: block;
+    font-weight: 400;
+    color: #888;
+    font-size: 13px;
+    margin-top: 1px;
+  }
+
+  /* alternating rows: odd = white, even = light gray */
+  .feat-table tbody tr:nth-child(odd)  { background: #ffffff; }
+  .feat-table tbody tr:nth-child(even) { background: #f9f9f9; }
+
+  .feat-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid #efefef;
+  }
+
+  .feat-table tbody tr:last-child td { border-bottom: none; }
+
+  .feat-table td.feat-name {
+    color: #1a1a1a;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  .feat-table td.val {
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .val-dec { color: #DC2626; }
+  .val-inc { color: #2563EB; }
+
+  /* ── Note ── */
+  .note {
+    font-size: 13px;
+    color: #888;
+    margin-top: 14px;
+    line-height: 1.6;
+    padding: 10px 14px;
+    border-left: 3px solid #e0e0e0;
+    background: #fafafa;
+    border-radius: 0 6px 6px 0;
+  }
+</style>
+</head>
+<body>
+
+<p class="subtitle">
+  A poorly-controlled patient-day (subject_16, TIR = 67.7%) routed through 3 behaviorally
+  feasible steps to near-optimal glycemic control (subject_08, TIR = 98.6%).
+  Each step d ≤ ε = 10.95. All four nodes are distinct subjects.
+</p>
+
+<!-- Path row -->
+<div class="path-row">
+
+  <!-- Source -->
+  <div class="node node-source">
+    <div class="node-label">subject_16</div>
+    <div class="node-id">node 108 · RED</div>
+    <div class="node-tir">67.7%</div>
+    <div class="tir-track"><div class="tir-fill" style="width:67.7%"></div></div>
+  </div>
+
+  <div class="connector">
+    <div class="arr-tir">+10.4 pp</div>
+    <div class="arr-icon">→</div>
+    <div class="arr-d">d = 8.98</div>
+  </div>
+
+  <!-- Hop 1 -->
+  <div class="node node-inter">
+    <div class="node-label">subject_03</div>
+    <div class="node-id">node 150 · BLUE</div>
+    <div class="node-tir">78.1%</div>
+    <div class="tir-track"><div class="tir-fill" style="width:78.1%"></div></div>
+  </div>
+
+  <div class="connector">
+    <div class="arr-tir">+11.1 pp</div>
+    <div class="arr-icon">→</div>
+    <div class="arr-d">d = 8.42</div>
+  </div>
+
+  <!-- Hop 2 -->
+  <div class="node node-inter">
+    <div class="node-label">subject_10</div>
+    <div class="node-id">node 256 · BLUE</div>
+    <div class="node-tir">89.2%</div>
+    <div class="tir-track"><div class="tir-fill" style="width:89.2%"></div></div>
+  </div>
+
+  <div class="connector">
+    <div class="arr-tir">+9.4 pp</div>
+    <div class="arr-icon">→</div>
+    <div class="arr-d">d = 7.31</div>
+  </div>
+
+  <!-- Target -->
+  <div class="node node-target">
+    <div class="node-label">subject_08</div>
+    <div class="node-id">node 1 · BLUE</div>
+    <div class="node-tir">98.6%</div>
+    <div class="tir-track"><div class="tir-fill" style="width:98.6%"></div></div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend-row">
+  <span><span class="dec">↓ decrease</span></span>
+  <span><span class="inc">↑ increase</span></span>
+  <span>values in MCID units</span>
+</div>
+
+<!-- Feature table -->
+<div class="table-wrap">
+  <table class="feat-table">
+    <thead>
+      <tr>
+        <th style="width:36%">Feature</th>
+        <th class="step-head">Step 1 <span>68% → 78%</span></th>
+        <th class="step-head">Step 2 <span>78% → 89%</span></th>
+        <th class="step-head">Step 3 <span>89% → 99%</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="feat-name">total_carbs</td>
+        <td class="val val-dec">↓ 7.40</td>
+        <td class="val val-dec">↓ 4.20</td>
+        <td class="val val-dec">↓ 4.00</td>
+      </tr>
+      <tr>
+        <td class="feat-name">total_correction_insulin</td>
+        <td class="val val-dec">↓ 3.73</td>
+        <td class="val val-inc">↑ 1.10</td>
+        <td class="val val-dec">↓ 3.16</td>
+      </tr>
+      <tr>
+        <td class="feat-name">avg_meal_bolus_delta_min</td>
+        <td class="val val-dec">↓ 1.96</td>
+        <td class="val val-dec">↓ 4.15</td>
+        <td class="val val-dec">↓ 0.13</td>
+      </tr>
+      <tr>
+        <td class="feat-name">avg_carbs_per_meal</td>
+        <td class="val val-dec">↓ 1.85</td>
+        <td class="val val-dec">↓ 1.05</td>
+        <td class="val val-inc">↑ 0.83</td>
+      </tr>
+      <tr>
+        <td class="feat-name">avg_time_between_meals</td>
+        <td class="val val-dec">↓ 2.14</td>
+        <td class="val val-inc">↑ 2.78</td>
+        <td class="val val-inc">↑ 4.86</td>
+      </tr>
+      <tr>
+        <td class="feat-name">total_daily_insulin</td>
+        <td class="val val-inc">↑ 0.26</td>
+        <td class="val val-dec">↓ 4.94</td>
+        <td class="val val-dec">↓ 0.92</td>
+      </tr>
+      <tr>
+        <td class="feat-name">bolus_per_meal</td>
+        <td class="val val-inc">↑ 0.07</td>
+        <td class="val val-dec">↓ 1.24</td>
+        <td class="val val-inc">↑ 1.51</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<p class="note">
+  Real data. node_ids: 108 → 150 → 256 → 1. Features sorted by clinical relevance.
+  The d values decrease along the path (8.98 → 8.42 → 7.31), reflecting progressively
+  tighter behavioral similarity as the path approaches the target.
+</p>
+
+</body>
+</html>
