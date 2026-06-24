@@ -4,7 +4,7 @@ from matplotlib.lines import Line2D
 
 matplotlib.use('Agg')
 
-OUT_PATH = 'basic_results/path_progression.png'
+OUT_PATH = 'results/path_progression_example.png'
 
 # ── Data ───────────────────────────────────────────────────────────────────────
 # Source: subject_14, 2025-06-19, TIR = 68.1%

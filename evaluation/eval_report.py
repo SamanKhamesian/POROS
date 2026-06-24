@@ -10,16 +10,13 @@ Functions
   _print_nearest_section  : full 4-combo printout for B or D
   _print_teachers         : role model subject frequency table
   print_summary           : top-level report across all four queries
-  plot_path_length_histogram : P1 figure — multi-hop path length distribution
 """
 
-from collections import Counter, defaultdict
+from collections import defaultdict
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from node import FEATURE_KEYS
-
 
 # ── Style ─────────────────────────────────────────────────────────────────────
 
@@ -272,56 +269,3 @@ def print_summary(ap, nr):
     _print_teachers(nr["d"]["c4"]["paths"])
 
     print(f"\n{'═' * W}\n")
-
-
-# ── Figures ───────────────────────────────────────────────────────────────────
-
-def plot_path_length_histogram(a_mh_hops, c_mh_hops, save_path):
-    """
-    P1 figure: distribution of multi-hop path lengths (in hops).
-
-    Parameters
-    ----------
-    a_mh_hops   : list[int]  — hop counts, all-pairs multi-hop
-    c_mh_hops   : list[int]  — hop counts, poorly-controlled source multi-hop
-    save_path   : str
-    """
-    fig, axes = plt.subplots(1, 2, figsize=(15, 5))
-
-    datasets = [
-        (a_mh_hops, "tab:blue", "All Source Nodes — Path Length Distribution"),
-        (c_mh_hops, "tab:red",  "Poorly-Controlled Sources — Path Length Distribution"),
-    ]
-
-    for ax, (hops, color, subtitle) in zip(axes, datasets):
-        counts  = Counter(hops)
-        max_hop = max(counts)
-        xs_int  = list(range(2, max_hop + 1))
-        total   = sum(counts.values())
-        pcts    = [counts.get(x, 0) / total * 100 for x in xs_int]
-        x_pos   = np.arange(len(xs_int))
-        labels  = [str(x) for x in xs_int]
-
-        ax.bar(x_pos, pcts, width=0.75, color=color,  alpha=0.4, edgecolor="none")
-        ax.bar(x_pos, pcts, width=0.75, color="none", edgecolor=color, linewidth=2)
-
-        for x, pct in zip(x_pos, pcts):
-            if pct >= 0.5:
-                ax.text(x, pct + 0.8, f"{pct:.1f}%",
-                        ha="center", va="bottom", fontsize=11, color="dimgray")
-
-        ax.set_xticks(x_pos)
-        ax.set_xticklabels(labels, fontsize=12)
-        ax.set_xlabel("Path length (Hops)", fontsize=13)
-        ax.set_ylabel("% of Paths", fontsize=13)
-        ax.set_title(subtitle, fontsize=16)
-        ax.set_ylim(0, max(pcts) * 1.25)
-        ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
-        ax.set_facecolor("whitesmoke")
-
-    fig.tight_layout()
-
-    fig.savefig(save_path, dpi=300, bbox_inches="tight")
-    print(f"  saved → {save_path}")
-
-    plt.close(fig)

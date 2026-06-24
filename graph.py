@@ -118,7 +118,7 @@ class Graph:
             for b_id, w in neighbors:
                 G.add_edge(a_id, b_id, weight=w)
 
-        pos = nx.spring_layout(G, seed=42, k=1.75)
+        pos = nx.spring_layout(G, seed=42, k=2)
 
         tir_values = [self.node_index[n].tir for n in G.nodes()]
         norm = TwoSlopeNorm(vmin=40, vcenter=70, vmax=100)
@@ -139,15 +139,15 @@ class Graph:
         plt.title(f"Constrained-Graph for Daily Behavioral Profile\n{len(self.nodes)} nodes, {G.number_of_edges()} edges", fontsize=18)
         plt.axis("off")
         plt.tight_layout()
-        plt.savefig("basic_results/graph_new.png", dpi=300)
-        plt.show()
+        plt.savefig("results/graph.png", dpi=300)
+        plt.close()
 
 
 def run():
     nodes = create_nodes(dataset_folder)
     graph = Graph(nodes)
-    # graph.print_graph()
-    # graph.visualize()
+    graph.print_graph()
+    graph.visualize()
 
 
 if __name__ == "__main__":
