@@ -26,6 +26,13 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Directories and files
+archive/
+archive_results/
+basic_results/
+results/
+dataset/.DS_Store
+
 # PyInstaller
 #   Usually these files are written by a python script from a template
 #   before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -35,6 +42,7 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+.idea/
 
 # Unit test / coverage reports
 htmlcov/
