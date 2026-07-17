@@ -16,19 +16,13 @@ from collections import defaultdict
 
 import numpy as np
 
-from node import FEATURE_KEYS
+from config import FEATURE_KEYS
 
 # ── Style ─────────────────────────────────────────────────────────────────────
 
-FEATURE_LABEL = {
-    "total_carbs":                  "total_carbs",
-    "avg_carbs_per_meal":           "avg_carbs_per_meal",
-    "avg_time_between_meals":       "avg_time_between_meals",
-    "total_daily_insulin":          "total_daily_insulin",
-    "bolus_per_meal":               "bolus_per_meal",
-    "total_correction_insulin":     "total_correction_insulin",
-    "avg_meal_bolus_delta_minutes": "avg_meal_bolus_delta_min",
-}
+_DISPLAY_NAMES = {"avg_meal_bolus_delta_minutes": "avg_meal_bolus_delta_min", }
+
+FEATURE_LABEL = {k: _DISPLAY_NAMES.get(k, k) for k in FEATURE_KEYS}
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

@@ -63,6 +63,7 @@ Comparison columns for A and C
 """
 
 from config import DATASET_FOLDER
+from evaluation.eval_baseline import compute_baseline, print_baseline
 from evaluation.eval_compute import compute_all_pairs, compute_nearest_paths
 from evaluation.eval_report import print_summary
 from graph import Graph, create_nodes
@@ -87,11 +88,15 @@ def run():
 
     print_summary(ap, nr)
 
+    print("\nEndpoint-only baseline ...")
+    bl = compute_baseline(graph)
+    print_baseline(bl)
+
     print("\nGenerating P1 figures ...")
     plot_path_length_histogram(
         ap["a_mh_hops"],
         ap["c_mh_hops"],
-        save_path="./results/path_length_histogram.png"
+        save_path="./results_uom/path_length_histogram.png"
     )
 
 

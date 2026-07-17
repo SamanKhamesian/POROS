@@ -33,10 +33,10 @@ def reconstruct_path(graph, prev, target_id):
 
 
 def _raw_cbtd(node_a, node_b):
-    return sum(
-        abs(node_b.features[k] - node_a.features[k]) / DELTA[k]
-        for k in FEATURE_KEYS
-    )
+    delta = np.array([DELTA[k] for k in FEATURE_KEYS])
+    va = np.array([node_a.features[k] for k in FEATURE_KEYS])
+    vb = np.array([node_b.features[k] for k in FEATURE_KEYS])
+    return float(np.sqrt(np.sum(((va - vb) / delta) ** 2)))
 
 
 # ── Computation ───────────────────────────────────────────────────────────────
