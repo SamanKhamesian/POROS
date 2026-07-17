@@ -3,31 +3,7 @@ from enum import Enum
 import numpy as np
 import pandas as pd
 
-TIR_THRESHOLD = 70.0
-
-FEATURE_KEYS = [
-    # carb / meal features
-    "total_carbs",
-    # "meal_frequency",
-    "avg_carbs_per_meal",
-    "avg_time_between_meals",
-    # "first_meal_hour",
-    # "last_meal_hour",
-
-    # insulin features
-    "total_daily_insulin",
-    "bolus_per_meal",
-    "total_correction_insulin",
-
-    # timing
-    "avg_meal_bolus_delta_minutes",
-
-    # # activity / sleep
-    # "total_steps",
-    # "exercise_duration",
-    # "sleep_duration",
-]
-
+from config import FEATURE_KEYS, TIR_THRESHOLD
 
 class Color(Enum):
     RED  = "red"

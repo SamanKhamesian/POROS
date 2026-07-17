@@ -5,15 +5,18 @@ import matplotlib.pyplot as plt
 import networkx as nx
 from matplotlib.colors import TwoSlopeNorm
 
+from config import DATASET, DATASET_FOLDER
 from distance import DistanceMetric
 from node import Node
-from preprocess import build_dataset
 
-dataset_folder = "dataset/ExActHealth"
+if DATASET == "ExActHealth":
+    from preprocess import build_dataset as _build_fn
+else:
+    from preprocess_uom import build_dataset_uom as _build_fn
 
 
 def create_nodes(folder_path):
-    database = build_dataset(folder_path)
+    database = _build_fn(folder_path)
     nodes = []
 
     for index, day in database.iterrows():
@@ -144,7 +147,7 @@ class Graph:
 
 
 def run():
-    nodes = create_nodes(dataset_folder)
+    nodes = create_nodes(DATASET_FOLDER)
     graph = Graph(nodes)
     graph.print_graph()
     graph.visualize()
