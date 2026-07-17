@@ -9,15 +9,16 @@ Outputs
   results/d_vs_d2.png               grouped bar: single-hop vs multi-hop under d and d²
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+from config import DATASET_FOLDER
 from graph import Graph, create_nodes
 from node import Color
 from query import _dijkstra_all
 
-DATASET_FOLDER = "dataset/ExActHealth"
 PRINCIPLED_EPS = 10.95
 EPSILON_RANGE  = [3, 6, 9, 10.95, 12, 15, 18, 21]
 

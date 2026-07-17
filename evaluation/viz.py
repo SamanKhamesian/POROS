@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.stats import gaussian_kde
 
+from config import DATASET_FOLDER
 from graph import Graph, create_nodes
 
-dataset_folder = "dataset/ExActHealth"
 
 RED_C  = "tab:red"
 BLUE_C = "tab:blue"
@@ -230,7 +230,7 @@ def plot_path_length_histogram(a_mh_hops, c_mh_hops, save_path):
 
 
 if __name__ == "__main__":
-    nodes = create_nodes(dataset_folder)
+    nodes = create_nodes(DATASET_FOLDER)
     graph = Graph(nodes)
 
     plot_tir_distribution(graph)

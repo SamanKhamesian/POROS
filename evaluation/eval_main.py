@@ -62,13 +62,12 @@ Comparison columns for A and C
     agreement   when (1)=(2) and (3)=(4): both methods agree on the target
 """
 
+from config import DATASET_FOLDER
 from evaluation.eval_compute import compute_all_pairs, compute_nearest_paths
 from evaluation.eval_report import print_summary
 from graph import Graph, create_nodes
 from node import Color
 from viz import plot_path_length_histogram
-
-DATASET_FOLDER = "dataset/ExActHealth"
 
 
 def run():
