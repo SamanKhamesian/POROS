@@ -32,7 +32,10 @@ archive/
 archive_results/
 basic_results/
 results/
-dataset/.DS_Store
+.DS_Store
+dataset/
+dataset/ExActHealth
+dataset/T1D-UOM
 
 # PyInstaller
 #   Usually these files are written by a python script from a template

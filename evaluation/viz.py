@@ -48,9 +48,9 @@ def plot_tir_distribution(graph: Graph) -> None:
     labels = [f"{e}-{e + 10}" for e in bin_edges[:-1]]
     x_pos = np.arange(len(pcts))
 
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(8, 4.5))
 
-    ax.bar(x_pos, pcts, width=0.75, color="tab:blue", alpha=0.4, edgecolor="none")
+    ax.bar(x_pos, pcts, width=0.75, color="tab:blue", alpha=0.6, edgecolor="none")
     ax.bar(x_pos, pcts, width=0.75, color="none", edgecolor="tab:blue", linewidth=2)
 
     for x, pct in zip(x_pos, pcts):
@@ -58,16 +58,17 @@ def plot_tir_distribution(graph: Graph) -> None:
             ax.text(x, pct + 1.5, f"{pct:.1f}%", ha="center", va="bottom", fontsize=12, color="dimgray")
 
     ax.set_xticks(x_pos)
-    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=12)
-    ax.set_xlabel("Time in Range (%)", fontsize=13)
-    ax.set_ylabel("% of Nodes (Days)", fontsize=13)
-    ax.set_title("Node TIR Distribution", fontsize=16)
+    ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=14)
+    ax.tick_params(axis="both", labelsize=14)
+    ax.set_xlabel("Time in Range (%)", fontsize=15)
+    ax.set_ylabel("% of Nodes (Days)", fontsize=15)
+    # ax.set_title("Node TIR Distribution", fontsize=16)
     ax.set_ylim(0, 50)
     ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
     ax.set_facecolor("whitesmoke")
 
     plt.tight_layout()
-    plt.savefig("results/grsph_node_tir_distribution.png", dpi=300)
+    plt.savefig("results/graph_node_tir_distribution.png", dpi=300)
     plt.show()
 
 # ── 2. edges distance distribution ──────────────────────────────────────────
@@ -191,11 +192,11 @@ def plot_path_length_histogram(a_mh_hops, c_mh_hops, save_path):
 
     base, ext = os.path.splitext(save_path)
 
-    datasets = [(a_mh_hops, "tab:blue", "All Source Nodes — Path Length Distribution", f"{base}_all{ext}"),
+    datasets = [(a_mh_hops, "tab:red", "All Source Nodes — Path Length Distribution", f"{base}_all{ext}"),
                 (c_mh_hops, "tab:red", "Poorly-Controlled Sources — Path Length Distribution", f"{base}_poorly_controlled{ext}"), ]
 
     for hops, color, subtitle, path in datasets:
-        fig, ax = plt.subplots(figsize=(8, 5))
+        fig, ax = plt.subplots(figsize=(8, 4.5))
 
         counts = Counter(hops)
         max_hop = max(counts)
@@ -205,18 +206,19 @@ def plot_path_length_histogram(a_mh_hops, c_mh_hops, save_path):
         x_pos = np.arange(len(xs_int))
         labels = [str(x) for x in xs_int]
 
-        ax.bar(x_pos, pcts, width=0.75, color=color, alpha=0.4, edgecolor="none")
+        ax.bar(x_pos, pcts, width=0.75, color=color, alpha=0.6, edgecolor="none")
         ax.bar(x_pos, pcts, width=0.75, color="none", edgecolor=color, linewidth=2)
 
         for x, pct in zip(x_pos, pcts):
             if pct >= 0.5:
-                ax.text(x, pct + 0.8, f"{pct:.1f}%", ha="center", va="bottom", fontsize=11, color="dimgray")
+                ax.text(x, pct + 0.8, f"{pct:.1f}%", ha="center", va="bottom", fontsize=12, color="dimgray")
 
         ax.set_xticks(x_pos)
-        ax.set_xticklabels(labels, fontsize=12)
-        ax.set_xlabel("Path length (Hops)", fontsize=13)
-        ax.set_ylabel("% of Paths", fontsize=13)
-        ax.set_title(subtitle, fontsize=16)
+        ax.set_xticklabels(labels, fontsize=14)
+        ax.tick_params(axis='both', labelsize=14)
+        ax.set_xlabel("Path length (Hops)", fontsize=15)
+        ax.set_ylabel("% of Paths", fontsize=15)
+        # ax.set_title(subtitle, fontsize=16)
         ax.set_ylim(0, max(pcts) * 1.25)
         ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
         ax.set_facecolor("whitesmoke")
