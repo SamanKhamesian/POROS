@@ -34,7 +34,7 @@ class Graph:
         self.node_index = {n.node_id: n for n in nodes}
         self.edges      = defaultdict(list)
         self.metric     = DistanceMetric(nodes, True)
-        self.epsilon    = self.metric.compute_epsilon_2(nodes)
+        self.epsilon    = self.metric.compute_epsilon(nodes)
         self.build_edges(self.epsilon)
 
     # ------------------------------------------------------------------

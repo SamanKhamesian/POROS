@@ -1,9 +1,10 @@
 # "ExActHealth" | "T1D-UOM"
 DATASET = "T1D-UOM"
+# DATASET = "ExActHealth"
 
 DATASET_FOLDER = {
     "ExActHealth": "dataset/ExActHealth",
-    "T1D-UOM":     "dataset/T1D-UOM",
+    "T1D-UOM"    : "dataset/T1D-UOM",
 }[DATASET]
 
 TIR_THRESHOLD = 70.0
@@ -20,7 +21,7 @@ FEATURE_KEYS = [
     # insulin features
     "total_daily_insulin",
     "bolus_per_meal",
-    *(["total_correction_insulin"] if DATASET == "ExActHealth" else []),
+    #"total_correction_insulin"
 
     # timing
     "avg_meal_bolus_delta_minutes",
@@ -43,7 +44,7 @@ DELTA = {
     # insulin features
     "total_daily_insulin":          1.0,
     "bolus_per_meal":               1.0,
-    **( {"total_correction_insulin": 1.0} if DATASET == "ExActHealth" else {} ),
+    # "total_correction_insulin":   1.0,
 
     # timing
     "avg_meal_bolus_delta_minutes": 10.0,

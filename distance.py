@@ -77,31 +77,8 @@ class DistanceMetric:
                 distances[(node_a.node_id, node_b.node_id)] = self.compute(node_a, node_b)
         return distances
 
+
     def compute_epsilon(self, nodes: list[Node]) -> float:
-        """
-        Derive epsilon from the cohort's distance structure.
-
-        For each node, find its nearest neighbor distance (ignoring TIR direction).
-        Epsilon = max of those nearest-neighbor distances.
-
-        Interpretation: the smallest epsilon that guarantees every node has at
-        least one behavioral neighbor in the graph.
-        """
-        nn_distances = [
-            min(
-                self.pairwise[(node_a.node_id, node_b.node_id)]
-                for node_b in nodes
-                if node_b.node_id != node_a.node_id
-            )
-            for node_a in nodes
-        ]
-
-        epsilon = float(np.max(nn_distances))
-        print(f"Clinical epsilon = {epsilon:.4f}  "
-              f"(max of per-node nearest-neighbour distances, {len(nodes)} nodes)")
-        return epsilon
-
-    def compute_epsilon_2(self, nodes: list[Node]) -> float:
         """
         Derive epsilon from within-subject consecutive-day transitions.
 
