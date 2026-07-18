@@ -49,9 +49,9 @@ FEATURE_LABEL  = {k: _DISPLAY_NAMES.get(k, k) for k in FEATURE_KEYS}
 
 def _stats(vals):
     if not vals:
-        return 0.0, 0.0, 0.0, 0.0
+        return 0.0, 0.0, 0.0, 0.0, 0.0
     a = np.array(vals, dtype=float)
-    return float(a.mean()), float(np.median(a)), float(a.min()), float(a.max())
+    return float(a.mean()), float(np.median(a)), float(a.min()), float(a.max()), float(a.std())
 
 
 def _ascii_bar(value, max_value, width=12):
@@ -220,11 +220,11 @@ def _print_case_comparison(case_data, indent="  "):
     direct = case_data["direct"]
     poros  = case_data["poros"]
 
-    dc_m,  dc_med, _, _ = _stats(direct["cbtd"])
-    dt_m,  dt_med, _, _ = _stats(direct["tir"])
-    hm,    hmed,   _, _ = _stats(poros["hops"])
-    st_m,  st_med, _, _ = _stats(poros["step_tir"])
-    sc_m,  sc_med, _, _ = _stats(poros["step_cbtd"])
+    dc_m,  dc_med, _, _, _       = _stats(direct["cbtd"])
+    dt_m,  dt_med, _, _, dt_std  = _stats(direct["tir"])
+    hm,    hmed,   _, _, _       = _stats(poros["hops"])
+    st_m,  st_med, _, _, st_std  = _stats(poros["step_tir"])
+    sc_m,  sc_med, _, _, _       = _stats(poros["step_cbtd"])
 
     d_feat = {k: float(np.mean(direct["feat"][k]))     if direct["feat"][k]     else 0.0
               for k in FEATURE_KEYS}
@@ -247,6 +247,7 @@ def _print_case_comparison(case_data, indent="  "):
     print(f"{ind}{'CBTD / step  mean':<{L}}  {_n(dc_m)}  {_n(sc_m)}")
     print(f"{ind}{'CBTD / step  median':<{L}}  {_n(dc_med)}  {_n(sc_med)}")
     print(f"{ind}{'TIR gain / step  mean':<{L}}  {_pp(dt_m)}  {_pp(st_m)}")
+    print(f"{ind}{'TIR gain / step  std':<{L}}  {_pp(dt_std)}  {_pp(st_std)}")
     print(f"{ind}{'TIR gain / step  median':<{L}}  {_pp(dt_med)}  {_pp(st_med)}")
     print(f"{ind}{'total TIR gain':<{L}}  {_pp(dt_m)}  {_pp(dt_m)}")
     print()
@@ -270,8 +271,8 @@ def _print_case4(case4_data, epsilon, indent="  "):
     the required CBTD is above ε and no intermediate path exists.
     """
     direct = case4_data["direct"]
-    dc_m,  dc_med, _, _ = _stats(direct["cbtd"])
-    dt_m,  dt_med, _, _ = _stats(direct["tir"])
+    dc_m,  dc_med, _, _, _      = _stats(direct["cbtd"])
+    dt_m,  dt_med, _, _, dt_std = _stats(direct["tir"])
     d_feat = {k: float(np.mean(direct["feat"][k])) if direct["feat"][k] else 0.0
               for k in FEATURE_KEYS}
 
@@ -290,6 +291,7 @@ def _print_case4(case4_data, epsilon, indent="  "):
     print(f"{ind}{'CBTD  median':<{L}}  {_n(dc_med)}")
     print(f"{ind}{'ε':<{L}}  {_n(epsilon)}")
     print(f"{ind}{'TIR gain  mean':<{L}}  {_pp(dt_m)}")
+    print(f"{ind}{'TIR gain  std':<{L}}  {_pp(dt_std)}")
     print(f"{ind}{'TIR gain  median':<{L}}  {_pp(dt_med)}")
     print()
     print(f"{ind}Behavioral change required  (MCID units)")

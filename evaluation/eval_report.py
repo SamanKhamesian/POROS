@@ -29,9 +29,9 @@ FEATURE_LABEL = {k: _DISPLAY_NAMES.get(k, k) for k in FEATURE_KEYS}
 
 def _stats(vals):
     if not vals:
-        return 0.0, 0.0, 0.0, 0.0
+        return 0.0, 0.0, 0.0, 0.0, 0.0
     a = np.array(vals, dtype=float)
-    return float(a.mean()), float(np.median(a)), float(a.min()), float(a.max())
+    return float(a.mean()), float(np.median(a)), float(a.min()), float(a.max()), float(a.std())
 
 
 def _ascii_bar(value, max_value, width=14):
@@ -42,9 +42,9 @@ def _ascii_bar(value, max_value, width=14):
 # ── Console output ────────────────────────────────────────────────────────────
 
 def _print_tir_table(sh_vals, mh_flat, mh_path_means, indent="  "):
-    sm,  smed,  smin,  smax  = _stats(sh_vals)
-    fm,  fmed,  fmin,  fmax  = _stats(mh_flat)
-    pm,  pmed,  pmin,  pmax  = _stats(mh_path_means)
+    sm,  smed,  smin,  smax,  sstd  = _stats(sh_vals)
+    fm,  fmed,  fmin,  fmax,  fstd  = _stats(mh_flat)
+    pm,  pmed,  pmin,  pmax,  pstd  = _stats(mh_path_means)
 
     n_sh = len(sh_vals);  n_st = len(mh_flat);  n_pa = len(mh_path_means)
 
@@ -54,6 +54,8 @@ def _print_tir_table(sh_vals, mh_flat, mh_path_means, indent="  "):
 
     def num_row(label, s, f, pv):
         return f"{p}{label:<{L}}  {s:>{N}.1f} pp  {f:>{N}.1f} pp  {pv:>{N}.1f} pp"
+    def std_row(label, s, f, pv):
+        return f"{p}{label:<{L}}  {s:>{N}.1f} pp  {f:>{N}.1f} pp  {pv:>{N}.1f} pp"
     def count_row(label, s, f, pv):
         return f"{p}{label:<{L}}  {s:>{COL},}  {f:>{COL},}  {pv:>{COL},}"
     def str_row(label, s, f, pv):
@@ -62,10 +64,11 @@ def _print_tir_table(sh_vals, mh_flat, mh_path_means, indent="  "):
     print(f"{p}{'':>{L}}  {'Direct path':>{COL}}  {'Multi-hop':>{COL}}  {'Multi-hop':>{COL}}")
     print(f"{p}{'':>{L}}  {'':>{COL}}  {'per step':>{COL}}  {'path avg':>{COL}}")
     print(sep)
-    print(num_row("Mean",   sm,   fm,   pm))
-    print(num_row("Median", smed, fmed, pmed))
-    print(num_row("Min",    smin, fmin, pmin))
-    print(num_row("Max",    smax, fmax, pmax))
+    print(num_row("Mean",   sm,    fm,    pm))
+    print(std_row("Std",    sstd,  fstd,  pstd))
+    print(num_row("Median", smed,  fmed,  pmed))
+    print(num_row("Min",    smin,  fmin,  pmin))
+    print(num_row("Max",    smax,  fmax,  pmax))
     print(sep)
     print(count_row("n",   n_sh, n_st, n_pa))
     print(str_row("unit",  "pairs", "steps", "paths"))
@@ -105,11 +108,12 @@ def _print_feature_single(feat, indent="  "):
 
 def _print_direct_combo(c, indent="  "):
     """Stats for a direct path combo (one value per source node)."""
-    tm, tmed, _, _ = _stats(c["tir"])
-    cm, cmed, _, _ = _stats(c["cbtd"])
+    tm, tmed, _, _, tstd = _stats(c["tir"])
+    cm, cmed, _, _, _    = _stats(c["cbtd"])
     p = f"{indent}  "
     L = 16;  N = 8
     print(f"{p}{'TIR gain  mean':<{L}}  {tm:>{N}.1f} pp")
+    print(f"{p}{'TIR gain  std':<{L}}  {tstd:>{N}.1f} pp")
     print(f"{p}{'TIR gain  median':<{L}}  {tmed:>{N}.1f} pp")
     print(f"{p}{'CBTD  mean':<{L}}  {cm:>{N}.2f}")
     print(f"{p}{'CBTD  median':<{L}}  {cmed:>{N}.2f}")
@@ -121,11 +125,12 @@ def _print_direct_combo(c, indent="  "):
 
 def _print_graph_combo(c, indent="  "):
     """Stats for a graph path combo (per-step values)."""
-    sm, smed, _, _ = _stats(c["steps"])
-    pm, pmed, _, _ = _stats(c["pmeans"])
+    sm, smed, _, _, sstd = _stats(c["steps"])
+    pm, pmed, _, _, pstd = _stats(c["pmeans"])
     p = f"{indent}  "
     L = 16;  N = 8
     print(f"{p}{'TIR gain  mean':<{L}}  {sm:>{N}.1f} pp/step   {pm:>{N}.1f} pp/path avg")
+    print(f"{p}{'TIR gain  std':<{L}}  {sstd:>{N}.1f} pp/step   {pstd:>{N}.1f} pp/path avg")
     print(f"{p}{'TIR gain  median':<{L}}  {smed:>{N}.1f} pp/step   {pmed:>{N}.1f} pp/path avg")
     print(f"{p}{'n  steps / paths':<{L}}  {len(c['steps']):>{N},}           {len(c['pmeans']):>{N},}")
     print()
