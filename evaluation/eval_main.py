@@ -68,7 +68,12 @@ from evaluation.eval_compute import compute_all_pairs, compute_nearest_paths
 from evaluation.eval_report import print_summary
 from graph import Graph, create_nodes
 from node import Color
-from viz import plot_path_length_histogram
+from eval_graph_distribution import (
+    plot_tir_distribution,
+    plot_node_distance_distribution,
+    plot_pairs_distance_distribution,
+    plot_path_length_histogram,
+)
 
 
 def run():
@@ -92,11 +97,16 @@ def run():
     bl = compute_baseline(graph)
     print_baseline(bl)
 
-    print("\nGenerating P1 figures ...")
+    print("\nGenerating graph distribution figures ...")
+    plot_tir_distribution(graph)
+    plot_node_distance_distribution(graph)
+    plot_pairs_distance_distribution(graph)
+
+    print("\nGenerating path length figures ...")
     plot_path_length_histogram(
         ap["a_mh_hops"],
         ap["c_mh_hops"],
-        save_path="./results_uom/path_length_histogram.png"
+        save_path="path_length_histogram.png"
     )
 
 

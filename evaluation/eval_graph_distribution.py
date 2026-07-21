@@ -62,18 +62,18 @@ def plot_tir_distribution(graph: Graph) -> None:
     ax.tick_params(axis="both", labelsize=14)
     ax.set_xlabel("Time in Range (%)", fontsize=15)
     ax.set_ylabel("% of Nodes (Days)", fontsize=15)
-    # ax.set_title("Node TIR Distribution", fontsize=16)
+    ax.set_title("Node TIR Distribution", fontsize=16)
     ax.set_ylim(0, 50)
     ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
     ax.set_facecolor("whitesmoke")
 
     plt.tight_layout()
-    plt.savefig("results/graph_node_tir_distribution.png", dpi=300)
-    plt.show()
+    plt.savefig("graph_node_tir_distribution.png", dpi=300)
+    plt.close()
 
 # ── 2. edges distance distribution ──────────────────────────────────────────
 
-def plot_edges_distance_distribution(graph: Graph) -> None:
+def plot_node_distance_distribution(graph: Graph) -> None:
     edge_dists = [
         graph.metric.pairwise[(src, tgt)]
         for src, neighbors in graph.edges.items()
@@ -85,10 +85,10 @@ def plot_edges_distance_distribution(graph: Graph) -> None:
 
     bin_edges = np.arange(0, np.ceil(dists.max()) + 1, 1)
     counts, _ = np.histogram(dists, bins=bin_edges)
-    pcts      = counts / total * 100
+    pcts = counts / total * 100
 
-    labels = [f"{int(e)}-{int(e)+1}" for e in bin_edges[:-1]]
-    x_pos  = np.arange(len(pcts))
+    labels = [f"{int(e)}-{int(e) + 1}" for e in bin_edges[:-1]]
+    x_pos = np.arange(len(pcts))
 
     fig, ax = plt.subplots(figsize=(8, 5))
 
@@ -104,21 +104,21 @@ def plot_edges_distance_distribution(graph: Graph) -> None:
     ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=12)
     ax.set_xlabel("Distance (CBTD)", fontsize=13)
     ax.set_ylabel("% of Edges", fontsize=13)
-    ax.set_title("Graph Edges Distance Distribution", fontsize=16)
+    ax.set_title("Graph Nodes Distance Distribution", fontsize=16)
     ax.set_ylim(0, 30)
     ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
     ax.set_facecolor("whitesmoke")
 
     plt.tight_layout()
-    plt.savefig("results/graph_edges_distance_distribution.png", dpi=300)
-    plt.show()
+    plt.savefig("graph_node_distance_distribution.png", dpi=300)
+    plt.close()
 
 # ── 3. all pairs distance distribution ──────────────────────────────────────────
 
 def plot_pairs_distance_distribution(graph: Graph) -> None:
     all_dists = list(graph.metric.pairwise.values())
     dists = np.array(all_dists)
-    epsilon = 10.95
+    epsilon = round(graph.epsilon, 2)
 
     kde = gaussian_kde(dists, bw_method="scott")
     x_grid = np.linspace(0, dists.max(), 1000)
@@ -170,8 +170,8 @@ def plot_pairs_distance_distribution(graph: Graph) -> None:
     ax.set_facecolor("whitesmoke")
 
     plt.tight_layout()
-    plt.savefig("results/graph_all_pairs_distance_distribution.png", dpi=300)
-    plt.show()
+    plt.savefig("graph_all_pairs_distance_distribution.png", dpi=300)
+    plt.close()
 
 # ── 4. path length histogram ──────────────────────────────────────────
 
@@ -218,7 +218,7 @@ def plot_path_length_histogram(a_mh_hops, c_mh_hops, save_path):
         ax.tick_params(axis='both', labelsize=14)
         ax.set_xlabel("Path length (Hops)", fontsize=15)
         ax.set_ylabel("% of Paths", fontsize=15)
-        # ax.set_title(subtitle, fontsize=16)
+        ax.set_title(subtitle, fontsize=16)
         ax.set_ylim(0, max(pcts) * 1.25)
         ax.grid(True, alpha=0.3, linestyle="-", linewidth=0.2, color="gray")
         ax.set_facecolor("whitesmoke")
@@ -234,5 +234,5 @@ if __name__ == "__main__":
     graph = Graph(nodes)
 
     plot_tir_distribution(graph)
-    plot_edges_distance_distribution(graph)
+    plot_node_distance_distribution(graph)
     plot_pairs_distance_distribution(graph)

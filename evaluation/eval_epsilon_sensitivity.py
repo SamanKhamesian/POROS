@@ -5,8 +5,8 @@ Run from the project root: python epsilon_sweep_full.py
 
 Outputs
 -------
-  results/epsilon_sensitivity.png   two-panel: disconnected ratio and mean CBTD/step vs epsilon
-  results/d_vs_d2.png               grouped bar: single-hop vs multi-hop under d and d²
+  epsilon_sensitivity.png   two-panel: disconnected ratio and mean CBTD/step vs epsilon
+  d_vs_d2.png               grouped bar: single-hop vs multi-hop under d and d²
 """
 
 from collections import defaultdict
@@ -19,6 +19,7 @@ from graph import Graph, create_nodes
 from node import Color
 from query import _dijkstra_all
 
+# Based-on ExActHealth dataset - Needs modification for another dataset
 PRINCIPLED_EPS = 10.95
 EPSILON_RANGE  = [3, 6, 9, 10.95, 12, 15, 18, 21]
 
@@ -58,9 +59,9 @@ def sweep_epsilon(graph, epsilon_values):
       mean_cbtd_step : mean CBTD per step across all paths from RED to reachable BLUE
     """
     red_nodes = [n for n in graph.nodes if n.color == Color.RED]
-    blue_ids  = {n.node_id for n in graph.nodes if n.color == Color.BLUE}
+    blue_ids = {n.node_id for n in graph.nodes if n.color == Color.BLUE}
 
-    disconnected    = []
+    disconnected = []
     mean_cbtd_steps = []
 
     for eps in epsilon_values:
@@ -89,7 +90,7 @@ def sweep_epsilon(graph, epsilon_values):
                     d = graph.metric.pairwise[(path[j].node_id, path[j + 1].node_id)]
                     all_cbtd_steps.append(d)
 
-        pct  = (1 - reachable_count / len(red_nodes)) * 100
+        pct = (1 - reachable_count / len(red_nodes)) * 100
         mean = float(np.mean(all_cbtd_steps)) if all_cbtd_steps else 0.0
         disconnected.append(pct)
         mean_cbtd_steps.append(mean)
@@ -150,8 +151,8 @@ def _style(ax):
 
 
 def plot_epsilon_sensitivity(epsilon_values, disconnected, mean_cbtd_steps, save_path):
-    pidx       = epsilon_values.index(PRINCIPLED_EPS)
-    xtick_pos  = [v for v in epsilon_values if v in TICK_SHOW]
+    pidx = epsilon_values.index(PRINCIPLED_EPS)
+    xtick_pos = [v for v in epsilon_values if v in TICK_SHOW]
     xtick_labs = [str(v) for v in xtick_pos]
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
@@ -166,23 +167,17 @@ def plot_epsilon_sensitivity(epsilon_values, disconnected, mean_cbtd_steps, save
                    linestyle="--", zorder=2)
 
     # Left: Disconnected ratio
-    ax1.plot(epsilon_values, disconnected, color="tab:blue", linewidth=2,
-             marker='o', markersize=5, markerfacecolor="tab:blue", zorder=3)
-    ax1.plot(PRINCIPLED_EPS, disconnected[pidx], 'o', color="tab:red",
-             markersize=8, zorder=4)
-    ax1.text(PRINCIPLED_EPS + 0.3, disconnected[pidx] + 3,
-             f'ε = {PRINCIPLED_EPS}', color="tab:red", fontsize=14)
+    ax1.plot(epsilon_values, disconnected, color="tab:blue", linewidth=2, marker='o', markersize=5, markerfacecolor="tab:blue", zorder=3)
+    ax1.plot(PRINCIPLED_EPS, disconnected[pidx], 'o', color="tab:red", markersize=8, zorder=4)
+    ax1.text(PRINCIPLED_EPS + 0.3, disconnected[pidx] + 3, f'ε = {PRINCIPLED_EPS}', color="tab:red", fontsize=14)
     ax1.set_xlabel('Epsilon ε', fontsize=15)
     ax1.set_ylabel('Disconnected RED nodes (%)', fontsize=15)
     ax1.set_ylim(0, 105)
 
     # Right: Mean CBTD per step
-    ax2.plot(epsilon_values, mean_cbtd_steps, color="tab:green", linewidth=2,
-             marker='o', markersize=5, markerfacecolor="tab:green", zorder=3)
-    ax2.plot(PRINCIPLED_EPS, mean_cbtd_steps[pidx], 'o', color="tab:red",
-             markersize=8, zorder=4)
-    ax2.text(PRINCIPLED_EPS + 0.3, mean_cbtd_steps[pidx] - 0.6,
-             f'ε = {PRINCIPLED_EPS}', color="tab:red", fontsize=14)
+    ax2.plot(epsilon_values, mean_cbtd_steps, color="tab:green", linewidth=2, marker='o', markersize=5, markerfacecolor="tab:green", zorder=3)
+    ax2.plot(PRINCIPLED_EPS, mean_cbtd_steps[pidx], 'o', color="tab:red", markersize=8, zorder=4)
+    ax2.text(PRINCIPLED_EPS + 0.3, mean_cbtd_steps[pidx] - 0.6, f'ε = {PRINCIPLED_EPS}', color="tab:red", fontsize=14)
     ax2.set_xlabel('Epsilon ε', fontsize=15)
     ax2.set_ylabel('Mean distance per step (CBTD)', fontsize=15)
     ax2.set_ylim(0, None)
@@ -197,7 +192,7 @@ def plot_d_vs_d2(results, save_path):
     labels = list(results.keys())
     totals = [results[l]['single'] + results[l]['multi'] for l in labels]
     single = [results[l]['single'] / totals[i] * 100 for i, l in enumerate(labels)]
-    multi  = [results[l]['multi']  / totals[i] * 100 for i, l in enumerate(labels)]
+    multi = [results[l]['multi'] / totals[i] * 100 for i, l in enumerate(labels)]
 
     x = np.arange(len(labels))
     width = 0.32
@@ -232,20 +227,17 @@ if __name__ == "__main__":
     print("Loading nodes and building graph ...")
     nodes = create_nodes(DATASET_FOLDER)
     graph = Graph(nodes)
-    n_red  = sum(1 for n in graph.nodes if n.color == Color.RED)
+    n_red = sum(1 for n in graph.nodes if n.color == Color.RED)
     n_blue = sum(1 for n in graph.nodes if n.color == Color.BLUE)
     print(f"  {len(graph.nodes)} nodes  |  {n_red} RED  |  {n_blue} BLUE")
     print(f"  principled ε = {graph.epsilon:.4f}\n")
 
     print("── Epsilon sensitivity sweep ──────────────────────────────")
     disconnected, mean_cbtd_steps = sweep_epsilon(graph, EPSILON_RANGE)
-    plot_epsilon_sensitivity(
-        EPSILON_RANGE, disconnected, mean_cbtd_steps,
-        save_path="results/epsilon_sensitivity.png"
-    )
+    plot_epsilon_sensitivity(EPSILON_RANGE, disconnected, mean_cbtd_steps, save_path="epsilon_sensitivity.png")
 
     print("\n── d vs d² comparison ─────────────────────────────────────")
     d_results = compute_d_vs_d2(graph)
-    plot_d_vs_d2(d_results, save_path="results/d_vs_d2.png")
+    plot_d_vs_d2(d_results, save_path="d_vs_d2.png")
 
     print("\nDone.")
