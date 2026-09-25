@@ -35,6 +35,8 @@ results_ex/
 results_uom/
 dataset/
 manuscript/
+figures/
+csv/
 
 # PyInstaller
 #   Usually these files are written by a python script from a template
