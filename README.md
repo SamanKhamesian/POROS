@@ -1,6 +1,6 @@
 # POROS
 
-**POROS: Peer-Grounded Optimal Routes Over States**
+**POROS: Peer-Grounded Counterfactual Path Planning for Chronic Health Management**
 
 Effective behavioral intervention in chronic disease management requires not a single prescription but a sequence of incremental steps, each grounded in what real, similar individuals have demonstrably achieved. 
 Counterfactual explanation offers a natural computational route to such guidance, answering what change in behavior would have produced a better outcome. 
@@ -22,9 +22,6 @@ Across both cohorts, 97-98% of multi-hop paths cross patient boundaries, embeddi
 
 - **Directory structure:**  
   Unzip and place the ```T1D-UOM``` folder in the ```./POROS/dataset/``` directory, keeping its ```Glucose Data```, ```Nutrition Data```, and ```Insulin Data``` subfolders.
-
-- **Dataset selection:**  
-  Set ```DATASET``` in ```config.py``` to ```"T1D-UOM"``` or ```"ExActHealth"```.
 
 ---
 
@@ -65,6 +62,24 @@ From the repository root, build the Behavioral Progression Graph, run all querie
 
 ```bash
 PYTHONPATH=. python evaluation/eval_main.py
+```
+
+---
+
+## 📖 Citation
+
+If you use POROS in your work, please cite:
+
+```bibtex
+@misc{khamesian2026peergroundedcounterfactualpathplanning,
+      title={Peer-Grounded Counterfactual Path Planning for Chronic Health Management}, 
+      author={Saman Khamesian and Hassan Ghasemzadeh},
+      year={2026},
+      eprint={2609.30838},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2609.30838}, 
+}
 ```
 
 ---
