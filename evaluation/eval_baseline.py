@@ -126,6 +126,9 @@ def compute_baseline(graph):
         print(f"\r  [{i+1:3d}/{n}]  {source.subject}  TIR={source.tir:.1f}%",
               end="", flush=True)
 
+        if not graph.outcome.has_model(source):
+            continue
+
         valid = [bl for bl in blue_nodes if bl.tir > source.tir]
         if not valid:
             continue
@@ -135,7 +138,7 @@ def compute_baseline(graph):
         # ── Endpoint-only target: nearest BLUE by L2 CBTD (matches graph) ────
         target_d = min(valid, key=lambda bl: graph.metric.pairwise[(source.node_id, bl.node_id)])
         cbtd_d   = graph.metric.pairwise[(source.node_id, target_d.node_id)]
-        tir_d    = target_d.tir - source.tir
+        tir_d    = graph.outcome.direct(source, target_d) - source.tir
         feat_d   = {k: abs(target_d.features[k] - source.features[k]) / DELTA[k]
                     for k in FEATURE_KEYS}
 
@@ -185,7 +188,7 @@ def compute_baseline(graph):
                     pop[case]["direct"]["feat"][k].append(feat_d[k])
 
                 # POROS side
-                step_tir = [path[j+1].tir - path[j].tir for j in range(hops)]
+                step_tir = np.diff(graph.outcome.path(path)).tolist()
                 pop[case]["poros"]["hops"].append(hops)
                 pop[case]["poros"]["step_tir"].extend(step_tir)
                 for j in range(hops):

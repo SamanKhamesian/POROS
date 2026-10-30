@@ -9,6 +9,9 @@ DATASET_FOLDER = {
 
 TIR_THRESHOLD = 70.0
 
+# outcome reported along returned paths: "observed" | "predicted"
+OUTCOME = "predicted"
+
 FEATURE_KEYS = [
     # carb / meal features
     "total_carbs",

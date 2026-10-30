@@ -69,12 +69,14 @@ def compute_all_pairs(graph):
     # ── Pass 1: direct path (no ε, no graph) ──────────────────────────────────
     print("  pass 1: direct path ...")
     for source in nodes:
+        if not graph.outcome.has_model(source):
+            continue
         for target in nodes:
             if target.color != Color.BLUE:
                 continue
             if target.tir <= source.tir:
                 continue
-            gain  = target.tir - source.tir
+            gain  = graph.outcome.direct(source, target) - source.tir
             cross = source.subject != target.subject
             is_c  = (source.color == Color.RED)
 
@@ -95,6 +97,8 @@ def compute_all_pairs(graph):
     for i, source in enumerate(nodes):
         print(f"\r    [{i+1:3d}/{n}]  {source.subject}  TIR={source.tir:.1f}%",
               end="", flush=True)
+        if not graph.outcome.has_model(source):
+            continue
         dist, prev = _dijkstra_all(graph, source.node_id)
 
         for target in nodes:
@@ -111,7 +115,7 @@ def compute_all_pairs(graph):
                 continue
 
             cross = any(nd.subject != source.subject for nd in path)
-            steps = [path[j+1].tir - path[j].tir for j in range(hops)]
+            steps = np.diff(graph.outcome.path(path)).tolist()
             pmean = float(np.mean(steps))
             is_c  = (source.color == Color.RED)
 
@@ -185,6 +189,9 @@ def compute_nearest_paths(graph):
         print(f"\r  [{i+1:3d}/{n}]  {source.subject}  TIR={source.tir:.1f}%",
               end="", flush=True)
 
+        if not graph.outcome.has_model(source):
+            continue
+
         valid = [bl for bl in blue_nodes if bl.tir > source.tir]
         if not valid:
             continue
@@ -194,7 +201,7 @@ def compute_nearest_paths(graph):
         # target_d: nearest BLUE by raw CBTD
         target_d = min(valid, key=lambda bl: _raw_cbtd(source, bl))
         cbtd_d   = _raw_cbtd(source, target_d)
-        tir_d    = target_d.tir - source.tir
+        tir_d    = graph.outcome.direct(source, target_d) - source.tir
         feat_d   = {k: abs(target_d.features[k] - source.features[k]) / DELTA[k]
                     for k in FEATURE_KEYS}
 
@@ -221,7 +228,7 @@ def compute_nearest_paths(graph):
 
             _, target_g = min(reachable)
             cbtd_g = _raw_cbtd(source, target_g)
-            tir_g  = target_g.tir - source.tir
+            tir_g  = graph.outcome.direct(source, target_g) - source.tir
             feat_g = {k: abs(target_g.features[k] - source.features[k]) / DELTA[k]
                       for k in FEATURE_KEYS}
 
@@ -238,7 +245,7 @@ def compute_nearest_paths(graph):
             path_g  = reconstruct_path(graph, prev, target_g.node_id)
             hops_g  = len(path_g) - 1
             result["hop_counts"][hops_g] += 1
-            steps_g = [path_g[j+1].tir - path_g[j].tir for j in range(hops_g)]
+            steps_g = np.diff(graph.outcome.path(path_g)).tolist()
             result["c4"]["steps"].extend(steps_g)
             result["c4"]["pmeans"].append(float(np.mean(steps_g)))
             result["c4"]["paths"].append(path_g)
@@ -252,7 +259,7 @@ def compute_nearest_paths(graph):
             if target_d.node_id in dist:
                 path_d  = reconstruct_path(graph, prev, target_d.node_id)
                 hops_d  = len(path_d) - 1
-                steps_d = [path_d[j+1].tir - path_d[j].tir for j in range(hops_d)]
+                steps_d = np.diff(graph.outcome.path(path_d)).tolist()
                 result["c3"]["steps"].extend(steps_d)
                 result["c3"]["pmeans"].append(float(np.mean(steps_d)))
                 result["c3"]["paths"].append(path_d)

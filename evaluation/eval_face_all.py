@@ -31,7 +31,7 @@ Metrics
   Feasibility (ε from the POROS derivation, applied to both methods)
     steps_over_eps       % of steps with d > ε                     POROS: 0
     paths_over_eps       % of paths with ≥ 1 step exceeding ε       POROS: 0
-    max_step_d           largest single step in a path
+    max_step_d           The largest single step in a path
 
   Monotonicity
     steps_backward       % of steps where TIR decreases             POROS: 0
@@ -71,6 +71,7 @@ from evaluation.eval_compute import reconstruct_path
 from face_baseline import FaceGraph, face_shortest_paths
 from graph import Graph, create_nodes
 from node import Color
+from outcome import Outcome
 from query import _dijkstra_all
 
 
@@ -79,7 +80,7 @@ from query import _dijkstra_all
 # not tied to the POROS ε: the k-NN construction keeps the baseline graph free
 # of any dependence on the ε derivation.
 
-FACE_K       = 5
+FACE_K       = 10
 CONNECTIVITY = "knn"      # "knn" | "epsilon"
 FACE_EPSILON = None       # only used if CONNECTIVITY == "epsilon"
 
@@ -130,17 +131,17 @@ def _path_metrics(graph, path, epsilon, density=None):
     hops   = len(path) - 1
 
     d_steps   = []
-    tir_steps = []
+    tirs      = graph.outcome.path(path)
+    tir_steps = np.diff(tirs).tolist()
 
     for j in range(hops):
         a, b = path[j], path[j + 1]
         d_steps.append(graph.metric.pairwise[(a.node_id, b.node_id)])
-        tir_steps.append(b.tir - a.tir)
 
     n_over_eps  = sum(1 for d in d_steps if d > epsilon)
     n_backward  = sum(1 for t in tir_steps if t < 0)
-    min_tir     = min(nd.tir for nd in path)
-    dip         = source.tir - min_tir            # > 0 means the path dropped below source
+    min_tir     = min(tirs)
+    dip         = tirs[0] - min_tir            # > 0 means the path dropped below source
 
     interior    = path[1:-1]
     n_red_inter = sum(1 for nd in interior if nd.color == Color.RED)
@@ -244,6 +245,9 @@ def compute_pairs_comparison(graph, fg):
     for i, source in enumerate(red_nodes):
         print(f"\r  [{i+1:4d}/{n_red}]  {source.subject}  TIR={source.tir:.1f}%",
               end="", flush=True)
+
+        if not graph.outcome.has_model(source):
+            continue
 
         targets = [b for b in blue_nodes if b.tir > source.tir]
         if not targets:
@@ -430,6 +434,7 @@ def print_pairs_comparison(res, cap=None):
     print(f"  Steps decreasing TIR (%)          {f['steps_backward']:>12}   {p['steps_backward']:>12}")
     print(f"  Paths with ≥1 backward step (%)   {f['paths_backward']:>12}   {p['paths_backward']:>12}")
     print(f"  Paths monotone end to end (%)     {f['paths_monotone']:>12}   {p['paths_monotone']:>12}")
+    print(f"  Paths below source TIR (%)        {f['paths_below']:>12}   {p['paths_below']:>12}")
     print(f"  Mean hops per path                {f['hops']:>12}   {p['hops']:>12}")
     print(f"  Mean d per step                   {f['d_per_step']:>12}   {p['d_per_step']:>12}")
     print(f"  Mean TIR gain per step (pp)       {f['tir_per_step']:>12}   {p['tir_per_step']:>12}")
@@ -459,7 +464,9 @@ def run():
     n_red  = sum(1 for n in graph.nodes if n.color == Color.RED)
     n_blue = sum(1 for n in graph.nodes if n.color == Color.BLUE)
     print(f"  {len(graph.nodes)} nodes  |  {n_red} RED  |  {n_blue} BLUE")
-    print(f"  ε = {graph.epsilon:.4f}\n")
+    print(f"  ε = {graph.epsilon:.4f}")
+    graph.outcome = Outcome(graph.nodes)
+    print()
 
     print("Building FACE graph ...")
     fg = FaceGraph(

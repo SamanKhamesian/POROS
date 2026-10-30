@@ -74,6 +74,7 @@ from evaluation.eval_compute import reconstruct_path
 from face_baseline import FaceGraph, find_face_counterfactual
 from graph import Graph, create_nodes
 from node import Color
+from outcome import Outcome
 from query import _dijkstra_all
 
 
@@ -123,17 +124,17 @@ def _path_metrics(graph, path, epsilon, density=None):
     hops   = len(path) - 1
 
     d_steps   = []
-    tir_steps = []
+    tirs      = graph.outcome.path(path)
+    tir_steps = np.diff(tirs).tolist()
 
     for j in range(hops):
         a, b = path[j], path[j + 1]
         d_steps.append(graph.metric.pairwise[(a.node_id, b.node_id)])
-        tir_steps.append(b.tir - a.tir)
 
     n_over_eps  = sum(1 for d in d_steps if d > epsilon)
     n_backward  = sum(1 for t in tir_steps if t < 0)
-    min_tir     = min(nd.tir for nd in path)
-    dip         = source.tir - min_tir            # > 0 means path went below source
+    min_tir     = min(tirs)
+    dip         = tirs[0] - min_tir            # > 0 means path went below source
 
     interior    = path[1:-1]
     n_red_inter = sum(1 for nd in interior if nd.color == Color.RED)
@@ -237,6 +238,9 @@ def compute_face_comparison(graph, fg):
     for i, source in enumerate(red_nodes):
         print(f"\r  [{i+1:4d}/{n_red}]  {source.subject}  TIR={source.tir:.1f}%",
               end="", flush=True)
+
+        if not graph.outcome.has_model(source):
+            continue
 
         # ── FACE: selects its own target, returns its own path ────────────────
         cf = find_face_counterfactual(fg, source.node_id)
@@ -382,7 +386,9 @@ def run():
     n_red  = sum(1 for n in graph.nodes if n.color == Color.RED)
     n_blue = sum(1 for n in graph.nodes if n.color == Color.BLUE)
     print(f"  {len(graph.nodes)} nodes  |  {n_red} RED  |  {n_blue} BLUE")
-    print(f"  ε = {graph.epsilon:.4f}\n")
+    print(f"  ε = {graph.epsilon:.4f}")
+    graph.outcome = Outcome(graph.nodes)
+    print()
 
     print("Building FACE graph ...")
     fg = FaceGraph(

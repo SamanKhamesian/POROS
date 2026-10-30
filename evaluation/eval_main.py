@@ -68,6 +68,7 @@ from evaluation.eval_compute import compute_all_pairs, compute_nearest_paths
 from evaluation.eval_report import print_summary
 from graph import Graph, create_nodes
 from node import Color
+from outcome import Outcome
 from eval_graph_distribution import (
     plot_tir_distribution,
     plot_node_distance_distribution,
@@ -83,7 +84,9 @@ def run():
 
     n_red  = sum(1 for n in graph.nodes if n.color == Color.RED)
     n_blue = sum(1 for n in graph.nodes if n.color == Color.BLUE)
-    print(f"  {len(graph.nodes)} nodes  |  {n_red} RED  |  {n_blue} BLUE\n")
+    print(f"  {len(graph.nodes)} nodes  |  {n_red} RED  |  {n_blue} BLUE")
+    graph.outcome = Outcome(graph.nodes)
+    print()
 
     print("All-pairs  (A and C) ...")
     ap = compute_all_pairs(graph)
@@ -97,17 +100,17 @@ def run():
     bl = compute_baseline(graph)
     print_baseline(bl)
 
-    print("\nGenerating graph distribution figures ...")
-    plot_tir_distribution(graph)
-    plot_node_distance_distribution(graph)
-    plot_pairs_distance_distribution(graph)
+    # print("\nGenerating graph distribution figures ...")
+    # plot_tir_distribution(graph)
+    # plot_node_distance_distribution(graph)
+    # plot_pairs_distance_distribution(graph)
 
-    print("\nGenerating path length figures ...")
-    plot_path_length_histogram(
-        ap["a_mh_hops"],
-        ap["c_mh_hops"],
-        save_path="path_length_histogram.png"
-    )
+    # print("\nGenerating path length figures ...")
+    # plot_path_length_histogram(
+    #     ap["a_mh_hops"],
+    #     ap["c_mh_hops"],
+    #     save_path="path_length_histogram.png"
+    # )
 
 
 if __name__ == "__main__":
